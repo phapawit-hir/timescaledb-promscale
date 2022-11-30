@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  timescaledb:
+    image: timescale/timescaledb-ha:${time_tag}
+    restart: unless-stopped
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: ${time_user_db}
+      POSTGRES_PASSWORD: ${time_pass_db}
+    volumes:
+      - ${local_time_data}:${con_time_data}
+
+  promscale:
+    image: timescale/promscale:${prom_tag}
+    restart: unless-stopped
+    ports:
+    - 9201:9201/tcp
+    - 9202:9202/tcp
+    environment:
+      TS_PROM_LOG_LEVEL: debug
+      TS_PROM_DB_CONNECT_RETRIES: 10
+      PROMSCALE_DB_URI: postgres://postgres:tonghualabs@timescaledb:5432/postgres?sslmode=allow
+        #TS_PROM_DB_HOST: timescaledb
+        #TS_PROM_DB_USER: ${time_user_db}
+        #TS_PROM_DB_PASSWORD: ${time_pass_db}
+        #TS_PROM_DB_NAME: postgres
+      TS_PROM_WEB_TELEMETRY_PATH: /metrics-text
+    depends_on:
+    - timescaledb
