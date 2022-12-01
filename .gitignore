@@ -1,1 +1,2 @@
-config/timescaledb
+data/timescaledb
+data/postgres
