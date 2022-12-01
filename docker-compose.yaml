@@ -11,6 +11,8 @@ services:
       POSTGRES_PASSWORD: ${time_pass_db}
     volumes:
       - ${local_time_data}:${con_time_data}
+    networks:
+      - network
 
   promscale:
     image: timescale/promscale:${prom_tag}
@@ -28,4 +30,22 @@ services:
         #TS_PROM_DB_NAME: postgres
       TS_PROM_WEB_TELEMETRY_PATH: /metrics-text
     depends_on:
-    - timescaledb
+      - timescaledb
+      - postgres
+    networks:
+      - network
+    
+
+  postgres:
+    image: postgres:${postgres_tag}
+    restart: unless-stopped
+    volumes:
+      - ${local_postgres_data}:${con_postgres_data}
+    environment:
+      POSTGRES_USER: ${postgres_user}
+      POSTGRES_PASSWORD: ${postgres_pass}
+    networks:
+      - network
+
+networks:
+  network:
